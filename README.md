@@ -255,3 +255,70 @@ const {
   formState: { errors },
 } = useForm({ defaultValue: { email: "@naver.com" } });
 ```
+
+## setError 함수
+
+- setError 는 특정한 에러를 발생시키게 해준다.(trigger)
+- 특정항목에 대한 에러가 아닌 전체 form 에 대한 에러도 발생시킬수 있다.
+- 세번째 인자로 {shouldFocus: true} 를 넣으면 form 에서 사용자가 고른 input 항목에 강제로 focus 시킬수 있다.
+
+```javascript
+const { setError } = useForm();
+
+const onValid = (data) => {
+  if (data.password !== data.password1) {
+    setError(
+      "password1",
+      { message: "password are not the same" },
+      { shouldFocus: true }
+    );
+  }
+
+  // 특정항목에 대한 에러가 아닌 전체 form 에 대한 에러도 발생시킬수 있다.
+  setError("extraError", { message: "server offline" });
+};
+```
+
+### validate 옵션
+
+- 유효성 검사를 입맛대로 커스텀 하고 싶을 때 validate 옵션을 사용한다.
+- validate 옵션은 함수를 값으로 가진다 `validate: (value) => boolean`
+- false 면 validation 을 통과하지 못해서 에러를 발생시킨다. boolean 대신 string을 넣어서 에러메세지로 대체 가능
+- 여러 유효성검사 조건들을 중복해서 쓸수 있다.
+
+```javascript
+<input
+  {...register("firstName", {
+    required: "write here",
+    validate: {
+      noNico: (value) => (value.includes("nico") ? "no nicos allowed" : true),
+      noNick: (value) => (value.includes("nick") ? "no nick allowed" : true),
+    },
+  })}
+  placeholder='First Name'
+/>
+```
+
+### setValue 함수
+
+- submit 을 한 이후 input 의 내용을 비워주고 싶을 때 사용한다.
+
+```javascript
+const {handleSubmit, setValue} = useForm();
+
+const handleValid = (data) => {
+  console.log(data.toDo);
+  setValue("toDo", "") // toDo 항목인 form 의 값을 빈문자열""로 설정
+}
+return (
+  <form onSubmit= {handleSubmit(handleValid)}>
+  <input
+  {...register("toDo", {
+    required: "please write a todo",
+  })}
+  placeholder="write a todo"
+  >
+  <button>submit</button>
+  </form >
+)
+```
