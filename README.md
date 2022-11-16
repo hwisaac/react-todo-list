@@ -340,7 +340,7 @@ const toDoState = atom({
 
 function ToDoList(){
   const value = useRecoilValue(toDoState) // [] 값이 할당된다.
-  const modFn = useSetRecoilState(toDoState) // value를 수정할 수 있는 함수
+  const modFn = useSetRecoilState(toDoState) // value를 수정할 수 있는 함수. 값 이나 함수를 넣자!
 
   // 더 간편한 방법 (추천)
   const [value modFn] = useRecoilState(toDoState)
