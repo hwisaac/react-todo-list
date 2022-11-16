@@ -322,3 +322,25 @@ return (
   </form >
 )
 ```
+
+## Recoil 사용하기
+
+- recoil 의 atom 데이터에 접근하려면 useRecoilValue 함수를 사용한다. 인자는 atom 를 넘겨준다.
+- atom 의 값을 변경하려면 modifier 함수를 사용한다.
+- useRecoilState 훅을 이용하면 더 간단한 코드
+
+```javascript
+import {atom} from "recoil"
+const toDoState = atom({
+  key: "toDo",
+  default: [],
+})
+
+function ToDoList(){
+  const value = useRecoilValue(toDoState) // [] 값이 할당된다.
+  const modFn = useSetRecoilState(toDoState) // value를 수정할 수 있는 함수
+
+  // 더 간편한 방법 (추천)
+  const [value modFn] = useRecoilState(toDoState)
+}
+```
