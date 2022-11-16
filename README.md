@@ -346,3 +346,65 @@ function ToDoList(){
   const [value modFn] = useRecoilState(toDoState)
 }
 ```
+
+## 4.13 Categories
+
+###
+
+```javascript
+// DOING 카테고리에 속하면 버튼이 안보이고, 안속하면 버튼이 보인다.
+{
+  category !== "DOING" && (
+    <button name='DOING' onClick={onClick}>
+      Doing
+    </button>
+  );
+}
+```
+
+```javascript
+export interface IToDo {
+  text: string;
+  id: number;
+  category: "TO_DO" | "DOING" | "DONE";
+}
+// 에서
+const onClick = (newCategory: "TO_DO" | "DOING" | "DONE") => {
+  console.log(newCategory);
+};
+// 보다는 아래를 추천 (효과는 동일)
+const onClick = (newCategory: IToDo["category"]) => {
+  console.log(newCategory);
+};
+```
+
+### 버튼에 이름 부여해서 함수 하나로 핸들링하기
+
+```javascript
+function ToDo({ text, category, id }: IToDo) {
+  const setToDos = useSetRecoilState(toDoState);
+  const onClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const {
+      currentTarget: { name },
+    } = event; // event.currentTarget.name 에 클릭한 버튼의 name 값들이 담겨있다.
+  };
+}
+<li>
+  <span>{text}</span>
+  {category !== "DOING" && (
+    <button name='DOING' onClick={onClick}>
+      Doing
+    </button>
+  )}
+  {category !== "TO_DO" && (
+    <button name='TO_DO' onClick={onClick}>
+      To Do
+    </button>
+  )}
+  {category !== "DONE" && (
+    <button name='DONE' onClick={onClick}>
+      Done
+    </button>
+  )}
+</li>;
+```
