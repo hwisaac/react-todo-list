@@ -408,3 +408,33 @@ function ToDo({ text, category, id }: IToDo) {
   )}
 </li>;
 ```
+
+## immutability "배열의 원소를 어떻게 교체할까?"
+
+원소를 교체하는 이유는 원소의 위치가 바뀌지 않길 바라기 때문
+
+### category 수정해보기
+
+1. 수정하고 싶은 todo를 찾는 방법: id를 이용한다.
+2. 수정하고자 하는 todo의 경로를 알아야 한다. : 타겟의 index를 알아야 한다.
+3. slice 메소드 이용하면 간단
+
+```javascript
+function ToDo({ text, category, id }: IToDo) {
+  const setToDos = useSetRecoilState(toDoState);
+  const onClick = (event) => {
+    setToDos((oldToDos) => {
+      // targetIndex 를 알아냄
+      const targetIndex = oldToDos.findIndex((toDo) => toDo.id === id);
+      const oldToDo = oldToDos[targetIndex];
+      const newToDo = { text, id, category: name };
+
+      return [
+        oldToDos.slice(0, targetIndex),
+        newToDo,
+        ...oldToDo.slice(targetIndex + 1),
+      ];
+    });
+  };
+}
+```
