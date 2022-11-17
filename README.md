@@ -438,3 +438,83 @@ function ToDo({ text, category, id }: IToDo) {
   };
 }
 ```
+
+## Selector (from recoil)
+
+- selector 는 derived state를 나타낸다.
+- state 를 입력받아서 그걸 변형해 반환하는 순수함수를 거쳐 반환된 값을 말한다.
+- 즉 state 를 가져와서 다른 state 를 만들 수 있다.
+- atom 은 단순히 데이터를 주고 selector 가 그걸 변환해서 반환한다.
+- selector 는 atom 을 보고있다가. atom 이 변하면 selector도 변한다.
+- 사용 예시
+
+* 카테고리에 상관없이 모든 todo가 배열에 담겨 있다고 하자.
+* 각 카테고리마다 atom를 만들지 않고 하나의 atom만 쓰고 싶다.
+* selector 를 이용하면 이 todo들을 분류할 수 있다!
+
+### Selector 사용하기
+
+```javascript
+// atoms.tsx
+import {selector} from 'recoil';
+export const toDoSelector = selector({
+  key: "toDoSelector"
+  get: ({get}) => {
+    const toDos = get(toDoState);
+
+    return [toDos.filter((toDo) => toDo.category === "TO_DO"),
+            toDos.filter((toDo) => toDo.category === "DOING"),
+            toDos.filter((toDo) => toDo.category === "DONE")];
+  }
+})
+
+// ToDoList.tsx
+import { useRecoilValue } from "recoil";
+function ToDoList(){
+  const selectorOutput = useRecoilValue(toDoSelector);
+  const [toDos, doing, done] = useRecoilValue(toDoSelector);
+}
+```
+
+- selector() 에는 {key} 가 전달되어야 한다!
+- selector() 에는 get함수가 전달되어야 한다.
+
+* get함수는 object를 인자로 받는데 object 안에는 get 함수가 들어있다. 이 함수가 selector 로 atom 을 가져올 수 있다.
+
+- selector는 useRecoilValue 함수에 넣어준다.
+
+#### select 와 option 으로 필터링 하기
+
+```javascript
+// atoms.tsx
+export const toDoSelector = selector({
+  key: "toDoSelector",
+  get: ({ get }) => {
+    const toDos = get(toDoState);
+    const category = get(categoryState);
+    // category 에 따라서 todo 리스트를 반환한다
+    return toDos.filter((toDo) => toDo.category === category);
+  },
+});
+// ToDoList.tsx
+function ToDoList() {
+const toDos = useRecoilValue(toDoSelector);
+const [category, setCategory] = useRecoilState(categoryState);
+const onInput = (event: React.FormEvent<HTMLSelectElement>) => {
+  setCategory(event.currentTarget.value);
+};
+
+return (
+<select value={category} onInput={onInput}>
+  <option value='TO_DO'>To Do</option>
+  <option value='DOING'>Doing</option>
+  <option value='DONE'>Done</option>
+</select>
+<CreateToDo />
+
+{toDos?.map((toDo) => (
+  <ToDo key={toDo.id} {...toDo} />
+))}
+)
+}
+```
