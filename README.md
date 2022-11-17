@@ -478,6 +478,8 @@ function ToDoList(){
 
 - selector() 에는 {key} 가 전달되어야 한다!
 - selector() 에는 get함수가 전달되어야 한다.
+- get함수는 원하는 atom 을 가져와서 이용할수 있게 해주는 함수이다
+- get은 selector 가 어떤 것을 반환할지 결정한다
 
 * get함수는 object를 인자로 받는데 object 안에는 get 함수가 들어있다. 이 함수가 selector 로 atom 을 가져올 수 있다.
 
@@ -487,6 +489,8 @@ function ToDoList(){
 
 ```javascript
 // atoms.tsx
+// categoryState 의 값이 변할 때마다 selector 가 실행된다.
+// selector 는 toDo를 가져서 필요한 toDo를 필터링해서 반환
 export const toDoSelector = selector({
   key: "toDoSelector",
   get: ({ get }) => {
@@ -501,10 +505,12 @@ function ToDoList() {
 const toDos = useRecoilValue(toDoSelector);
 const [category, setCategory] = useRecoilState(categoryState);
 const onInput = (event: React.FormEvent<HTMLSelectElement>) => {
+  // onInput 함수는 select의 값을 가져와서 setCategory 함수에 넣어준다.
   setCategory(event.currentTarget.value);
 };
 
 return (
+  // select 는 input 이벤트를 감지하여 categoryState 라는 atom 의 상태를 바꾼다.
 <select value={category} onInput={onInput}>
   <option value='TO_DO'>To Do</option>
   <option value='DOING'>Doing</option>
@@ -517,4 +523,83 @@ return (
 ))}
 )
 }
+```
+
+## 6.18 Enums
+
+- typescript 에서 type 은 반복을 줄이고 싶을 때 쓴다
+
+```typescript
+type categories = "TO_DO" | "DOING" | "DONE" ;
+
+export interface IToDo{
+  text: string;
+  id: number;
+  category: categories;
+}
+
+export const categoryState = atom<categories>({
+  key: "category",
+  default: "TO_DO",
+})
+<select value={category} onInput={onInput}>
+  <option value="TO_DO">To Do</option>
+  <option value="DOING">Doing</option>
+  <option value="DONE">Done</option>
+</select>
+```
+
+### Enum 사용
+
+```javascript
+export enum Categories {
+  "TO_DO",
+  "DOING",
+  "DONE",
+}
+export interface IToDo{
+  text: string;
+  id: number;
+  category: Categories;
+}
+export const categoryState = atom<Categories>({
+  key: "category",
+  default: Categories.TO_DO,
+})
+<select value={category} onInput={onInput}>
+  <option value={Categories.TO_DO}>To Do</option>
+  <option value={Categories.DOING}>Doing</option>
+  <option value={Categories.DONE}>Done</option>
+</select>
+//
+```
+
+- type 대신 enum 을 쓰면 뭐가 좋은가?
+  1. 훨씬 더 잘 보호받을 수 있다.
+  2. enum 에 선언된 애들에는 각각 순서 (번호)가 할당되어 있다.
+  3. enum 은 프로그래머를 도와주기 위해 숫자를 문자로 표현해주는 것이다.
+  4. 이 예제에서 모두가 같은 enum 같은 값을 참조하기만 하면 이름은 원하는 대로 지어도 되기 때문에 사용할수 있는 방법이다.
+
+```javascript
+export enum Categories{
+  "TO_DO",  //0
+  "DOING",  //1
+  "DONE",   //2
+}
+
+category !== Categories.DOING  // category !== 2 랑 똑같다.
+<button name = {Categories.TO_DO}>  // 문제발생 (name은 스트링이어야됨)
+<button name = {Categories.TO_DO + "" }>  // 문제 해결. name 에 "0" 이 들어간다.
+
+```
+
+- 실제로 값을 숫자가 아닌 값(예를들어 string)으로 줄 수도 있다.
+
+```javascript
+export enum Categories{
+  "TO_DO" = "TO_DO",  //TO_DO
+  "DOING" = "DOING",  //DOING
+  "DONE" = "DONE",    //DONE
+}
+<button name = {Categories.TO_DO}>  // 문제 없음.
 ```
